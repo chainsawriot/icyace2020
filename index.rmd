@@ -1,0 +1,37 @@
+## This is TRULY open communication
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+library(DT)
+library(dplyr)
+library(rvest)
+require(fuzzyjoin)
+
+vfair <- read_html("vfair_dump2.html")
+
+vfair %>% html_nodes("div.docrow") %>% html_node("h3") %>% html_text() -> all_titles 
+
+vfair %>% html_nodes("div.docrow") %>% html_node("div.presenter") %>% html_node("span") %>% html_node("strong") %>% html_text() -> all_presenters
+
+vfair %>% html_nodes("div.docrow") %>% html_node("a.play-webinar") %>% html_attr("data-url") -> vimeo_links
+
+abstracts <- rio::import("70th Annual ICA Conference_21MAY2020.csv") %>% as_tibble
+
+colnames(abstracts)[c(10, 14, 1, 3, 17)] <- c("abstract_title", "abstract_authors", "abstract_session_name", "abstract_div", "abstract_body")
+
+abstracts <- abstracts[, c(10, 14, 1, 3, 17)]
+
+tibble::tibble(title = all_titles, presenter = all_presenters, vimeo_link = vimeo_links) -> all_ica
+
+all_ica %>% stringdist_left_join(abstracts, by = c(title = "abstract_title"), method = "lv", max_dist = 3) -> all_ica_with_abstract
+
+
+all_ica_with_abstract %>% filter(title != "") %>% select(-abstract_title) %>% mutate(vimeo_link = paste0('<a  target=_blank href=', vimeo_link, '>link</a>' ) ) %>%
+    datatable(escape = FALSE, filter = "top",
+              options = list(columnDefs = list(list(
+                  targets = c(2, 7), render = JS(
+                                   "function(data, type, row, meta) {",
+                                   "return type === 'display' && data != null && data.length > 50 ?",
+                                   "'<span title=\"' + data + '\">' + data.substr(0, 50) + '...</span>' : data;",
+                                   "}")
+              ))))
+```
