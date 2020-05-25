@@ -1,12 +1,14 @@
 ## This is TRULY open communication
 
+Last update: `r Sys.time()`
+
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 library(DT)
 library(dplyr)
 library(rvest)
 require(fuzzyjoin)
 
-vfair <- read_html("vfair_dump4.html")
+vfair <- read_html("vfair_dump5.html")
 
 vfair %>% html_nodes("div.docrow") %>% html_node("h3") %>% html_text() -> all_titles 
 
