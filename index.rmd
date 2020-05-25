@@ -6,7 +6,7 @@ library(dplyr)
 library(rvest)
 require(fuzzyjoin)
 
-vfair <- read_html("vfair_dump3.html")
+vfair <- read_html("vfair_dump4.html")
 
 vfair %>% html_nodes("div.docrow") %>% html_node("h3") %>% html_text() -> all_titles 
 
